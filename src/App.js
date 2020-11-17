@@ -9,10 +9,6 @@ function buf2hex(buffer) {
   return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
 }
 
-function fromHexString(hexString) {
-  return new Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
-}
-
 class App extends React.Component {
   state = {
 
