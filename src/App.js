@@ -40,7 +40,7 @@ class App extends React.Component {
     const web3 = this.state.web3;
     const from = this.state.userAddress;
     //const nonce = await this.state.web3.eth.getTransactionCount(from);
-    const nonce = 148;
+    const nonce = 149;
 
     const rawTx =  {
       nonce,
@@ -51,6 +51,7 @@ class App extends React.Component {
       data: '',
 
       from, 
+      chainId: 3,
     };
     var tx = new Tx(rawTx);
     var hash = '0x' + buf2hex(tx.hash(false));
@@ -71,6 +72,10 @@ class App extends React.Component {
         r: '0x' + r,
         s: '0x' + s,
         v: parseInt(v, 16),
+      }
+
+      if (tx._chainId > 0) {
+        sig.v += tx._chainId * 2 + 8;
       }
   
       console.log('sig.r: ' + sig.r);
