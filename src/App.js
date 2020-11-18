@@ -51,7 +51,8 @@ class App extends React.Component {
       data: '',
 
       from, 
-      chainId: 3,
+      //eip155
+      //chainId: 3,
     };
     var tx = new Tx(rawTx);
     var hash = '0x' + buf2hex(tx.hash(false));
