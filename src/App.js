@@ -9,9 +9,11 @@ var Tx = require('ethereumjs-tx');
 const sigUtil = require('eth-sig-util')
 const QuoteFactory = require('./QuoteFactory.json').abi
 const Hello = require('./Hello.json')
-const helloContract = new privateChainWeb3.eth.Contract(Hello, '0x4611F8A6988C5B96990c74d5F8FeC69e26DC650C');
+const helloContractAddress = '0x3d7207cbd4194fa6031485e6024a9e7b1b030b7d'
+const helloContract = new privateChainWeb3.eth.Contract(Hello, helloContractAddress);
 
-const quoteFactoryContract = new privateChainWeb3.eth.Contract(QuoteFactory, '0x4611F8A6988C5B96990c74d5F8FeC69e26DC650C');
+const helloPrivateChainContractAddress = '0xb6127f405cE1cBEc0deD30714bd65968038D015B'
+const helloPrivateChainContract = new privateChainWeb3.eth.Contract(Hello, helloPrivateChainContractAddress);
 
 function buf2hex(buffer) {
   return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
@@ -54,7 +56,7 @@ class App extends React.Component {
       nonce,
       gasPrice: web3.utils.toHex(web3.utils.toWei('100', 'gwei')),
       gasLimit: web3.utils.toHex(Number(21000)),
-      to: '0x4611F8A6988C5B96990c74d5F8FeC69e26DC650C',
+      to: helloContractAddress,
       value: web3.utils.toHex(web3.utils.toWei('0.1', 'ether')),
       data: '',
 
@@ -100,42 +102,32 @@ class App extends React.Component {
   }
 
   transaction2 = async () => {    
+    const contractMethodPromiss = helloPrivateChainContract.methods.setName('haha');
     const web3 = this.state.web3;
-    const contractMethodPromiss = helloContract.methods.setName('hehe');
+    const web3Private = privateChainWeb3;
+
     const from = this.state.userAddress;
-    const contractAddress = '0xEaa3e797565Cb1b5576947E9c0943b145ce8F8E1';
-    const value = 0
-
-    const nonce = await privateChainWeb3.eth.getTransactionCount(from);
-    const gasPrice = await privateChainWeb3.eth.getGasPrice();
-
+    const nonce = await web3Private.eth.getTransactionCount(from);
     const dataField = await contractMethodPromiss.encodeABI();
 
-    var quantity = await web3.eth.estimateGas({
-      from,
-    })
-
-    console.log(`nonce: ${nonce}, gasPrice: ${gasPrice}, gasLimit: ${quantity}, from: ${from}, to: ${contractAddress}, value: ${value}, data: ${dataField}`)
-
-    var rawTx = {
+    const rawTx = {
       nonce,
-      gasPrice,
-      gasLimit: quantity,
-      from,
-      to: '0x0De4e0878504576E19eA11bDD75C9bf05D2d8F49',
-      value,
+      gasPrice: web3.utils.toHex(web3.utils.toWei('100', 'gwei')),
+      gasLimit: web3.utils.toHex(Number(61000)),
+      to: helloPrivateChainContractAddress,
+      value: web3.utils.toHex(web3.utils.toWei('0', 'ether')),
       data: dataField,
+
+      from,
+      //eip155
+      //chainId: 3,
     };
-
-    console.log(rawTx)
-
+    console.log(`nonce: ${nonce}`)
     var tx = new Tx(rawTx);
     var hash = '0x' + buf2hex(tx.hash(false));
     console.log('hash: ' + hash);
 
-    //web3.eth.sendTransaction(rawTx)
-
-    web3.eth.sign(hash, from, function (err, sign) {
+    web3.eth.sign(hash, from, async (err, sign) => {
       if (err) return console.error(err)
       console.log('transaction SIGNED: ' + sign);
 
@@ -165,10 +157,16 @@ class App extends React.Component {
       var serializedTx = tx.serialize();
       console.log('0x' + serializedTx.toString('hex'));
       alert('0x' + serializedTx.toString('hex'));
+
+      let res = await web3Private.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'));
+      console.log(res);
     });
   }
 
   transaction3 = async () => {
+    const contractMethodPromiss = helloContract.methods.setName('hehe');
+    const dataField = await contractMethodPromiss.encodeABI();
+
     const web3 = this.state.web3;
     const from = this.state.userAddress;
     const nonce = await this.state.web3.eth.getTransactionCount(from);
@@ -177,10 +175,10 @@ class App extends React.Component {
     const rawTx = {
       nonce,
       gasPrice: web3.utils.toHex(web3.utils.toWei('100', 'gwei')),
-      gasLimit: web3.utils.toHex(Number(21000)),
-      to: '0x87D044b7AA29152d5cECAfec5D47451099B1c961',
-      value: web3.utils.toHex(web3.utils.toWei('0.01', 'ether')),
-      data: '',
+      gasLimit: web3.utils.toHex(Number(61000)),
+      to: '0x3d7207cbd4194fa6031485e6024a9e7b1b030b7d',
+      value: web3.utils.toHex(web3.utils.toWei('0', 'ether')),
+      data: dataField,
 
       from,
       //eip155
