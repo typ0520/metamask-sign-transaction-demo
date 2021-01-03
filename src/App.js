@@ -236,6 +236,9 @@ class App extends React.Component {
 
       Object.assign(tx, sig);
 
+      var hash = '0x' + buf2hex(tx.hash(true));
+      console.log('tx-hash: ' + hash);
+
       var serializedTx = tx.serialize();
       console.log('0x' + serializedTx.toString('hex'));
       alert('0x' + serializedTx.toString('hex'));
